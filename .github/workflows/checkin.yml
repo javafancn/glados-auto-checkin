@@ -23,7 +23,7 @@ jobs:
         run: pip install requests
 
       - name: Random Delay
-        run: python3 -c "import time, random; sleep_time = random.randint(0, 3600); print(f'Sleeping {sleep_time}s...'); time.sleep(sleep_time)"
+        run: python3 -c "import time, random; sleep_time = random.randint(0, 300); print(f'Sleeping {sleep_time}s...'); time.sleep(sleep_time)"
 
       - name: Run Check-in
         env:
