@@ -6,21 +6,17 @@ from email.mime.text import MIMEText
 from email.header import Header
 
 def send_mail(subject, content):
-    # 从环境变量获取发送方配置
-    # MAIL_USERNAME: 发件人邮箱 (例如 545443766@qq.com)
-    # MAIL_PASSWORD: SMTP 授权码 (非登录密码)
     sender = os.environ.get("MAIL_USERNAME")
     password = os.environ.get("MAIL_PASSWORD")
-    # 默认收件人为用户指定的邮箱
     receiver = os.environ.get("MAIL_TO", "545443766@qq.com")
     
+    # 支持自定义 SMTP 服务器，默认为 QQ 邮箱
+    smtp_server = os.environ.get("MAIL_SMTP_SERVER", "smtp.qq.com")
+    smtp_port = int(os.environ.get("MAIL_SMTP_PORT", 465))
+    
     if not sender or not password:
-        print("⚠️ 邮件通知未配置: 缺少 MAIL_USERNAME 或 MAIL_PASSWORD，跳过发送。")
+        print("⚠️ 邮件通知未配置 (MAIL_USERNAME/MAIL_PASSWORD)，跳过发送。")
         return
-
-    # QQ 邮箱 SMTP 配置
-    smtp_server = "smtp.qq.com"
-    smtp_port = 465
 
     try:
         message = MIMEText(content, "plain", "utf-8")
@@ -28,8 +24,14 @@ def send_mail(subject, content):
         message["To"] = Header(receiver, "utf-8")
         message["Subject"] = Header(subject, "utf-8")
 
-        print("📧 正在发送告警邮件...")
-        server = smtplib.SMTP_SSL(smtp_server, smtp_port)
+        print("📧 正在发送邮件通知...")
+        if smtp_port == 465:
+            server = smtplib.SMTP_SSL(smtp_server, smtp_port)
+        else:
+            # 兼容非 SSL 端口 (如 587 TLS)
+            server = smtplib.SMTP(smtp_server, smtp_port)
+            server.starttls()
+            
         server.login(sender, password)
         server.sendmail(sender, [receiver], message.as_string())
         server.quit()
@@ -44,7 +46,7 @@ def checkin():
     if not cookie:
         msg = "❌ 错误: 未设置 GLADOS_COOKIE 环境变量"
         print(msg)
-        send_mail("GLaDOS 签到脚本配置错误", msg)
+        send_mail("GLaDOS 配置错误", msg)
         sys.exit(1)
 
     url = "https://glados.space/api/user/checkin"
@@ -65,36 +67,40 @@ def checkin():
             data = response.json()
             code = data.get("code")
             message = data.get("message")
-            
-            # code 0: 成功, code 1: 重复签到 (成功)
-            if code in [0, 1]:
-                if code == 0:
-                    print(f"✅ 签到成功: {message}")
-                else:
-                    print(f"ℹ️ 状态: {message}")
-                
-                if "token error" not in str(message).lower():
+            days_str = "未知"
+
+            # 获取天数 (如果不是 token error)
+            if "token error" not in str(message).lower():
+                try:
                     status_url = "https://glados.space/api/user/status"
                     status_resp = requests.get(status_url, headers=headers, timeout=10)
                     if status_resp.status_code == 200:
                         status_data = status_resp.json()
                         days = status_data.get("data", {}).get("leftDays")
                         days_str = str(days).split(".")[0] if "." in str(days) else str(days)
-                        print(f"📅 剩余会员天数: {days_str} 天")
+                except:
+                    pass
+
+            # code 0: 成功, code 1: 重复
+            if code in [0, 1]:
+                status_msg = "签到成功" if code == 0 else "重复签到"
+                log_msg = f"{status_msg}: {message}\n📅 剩余天数: {days_str}"
+                print(f"✅ {log_msg}")
+                # 现在的需求是：重复签到也要发邮件 (成功当然也要发)
+                send_mail(f"GLaDOS {status_msg}", log_msg)
             else:
-                # 签到失败 (Code 非 0/1)
-                err_msg = f"签到返回错误: {message} (Code: {code})"
+                err_msg = f"签到失败: {message} (Code: {code})"
                 print(f"❌ {err_msg}")
                 send_mail("GLaDOS 签到失败", err_msg)
         else:
             err_msg = f"HTTP 请求失败: {response.status_code}\n{response.text}"
             print(f"❌ {err_msg}")
-            send_mail("GLaDOS 签到网络错误", err_msg)
+            send_mail("GLaDOS 网络错误", err_msg)
             
     except Exception as e:
         err_msg = f"脚本执行异常: {str(e)}"
         print(f"❌ {err_msg}")
-        send_mail("GLaDOS 脚本运行异常", err_msg)
+        send_mail("GLaDOS 脚本错误", err_msg)
 
 if __name__ == "__main__":
     checkin()
