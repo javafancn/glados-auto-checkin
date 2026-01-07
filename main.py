@@ -10,8 +10,8 @@ def checkin():
         print("❌ 未找到 Cookie，请检查 Github Secrets 设置")
         return
 
-    url = "https://glados.rocks/api/user/checkin"
-    payload = {"token": "glados.network"}
+    url = "https://glados.space/api/user/checkin"
+    payload = {"token": "glados.space"}
     headers = {
         "Cookie": cookie,
         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
@@ -41,7 +41,7 @@ if __name__ == "__main__":
     # 为了模拟“白天随机时间”，我们让脚本随机休眠 0 到 3 小时 (10800秒)
     # 这样签到时间就会分布在启动后的 3 小时内
     
-    wait_seconds = random.randint(0, 10800) 
+    wait_seconds = random.randint(0, 30) 
     
     # 转换成小时和分钟方便查看日志
     m, s = divmod(wait_seconds, 60)
