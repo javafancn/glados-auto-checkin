@@ -1,20 +1,17 @@
 name: Glados Daily Checkin
 
 on:
-  # 允许手动触发 (方便测试)
-  workflow_dispatch:
-  # 定时触发
   schedule:
-    # 每天 UTC 时间 01:00 (即北京时间 09:00) 触发
-    # 配合脚本里的随机休眠，实际签到时间会在 09:00 ~ 12:00 之间随机
+    # 北京时间 9:00 = UTC 1:00
     - cron: '0 1 * * *'
+  workflow_dispatch:
 
 jobs:
-  checkin:
+  daily-checkin:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v3
 
       - name: Set up Python
@@ -22,13 +19,19 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Install dependencies
-        run: |
-          pip install requests
+      - name: Install Dependencies
+        run: pip install requests
 
-      - name: Run checkin script
+      - name: Random Delay
+        run: python3 -c "import time, random; sleep_time = random.randint(0, 3600); print(f'Sleeping {sleep_time}s...'); time.sleep(sleep_time)"
+
+      - name: Run Check-in
         env:
-          # 将 Secret 注入到环境变量中
           GLADOS_COOKIE: ${{ secrets.GLADOS_COOKIE }}
           GLADOS_TOKEN: ${{ secrets.GLADOS_TOKEN }}
-        run: python main.py
+          MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
+          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+          MAIL_TO: ${{ secrets.MAIL_TO }}
+          MAIL_SMTP_SERVER: ${{ secrets.MAIL_SMTP_SERVER }}
+          MAIL_SMTP_PORT: ${{ secrets.MAIL_SMTP_PORT }}
+        run: python3 main.py
