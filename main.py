@@ -3,14 +3,17 @@ import os
 import sys
 import smtplib
 from email.mime.text import MIMEText
-from email.header import Header
+from email.utils import formataddr
 
 def send_mail(subject, content):
     sender = os.environ.get("MAIL_USERNAME")
     password = os.environ.get("MAIL_PASSWORD")
-    receiver = os.environ.get("MAIL_TO", "545443766@qq.com")
     
-    # 支持自定义 SMTP 服务器，默认为 QQ 邮箱
+    receiver = os.environ.get("MAIL_TO")
+    if not receiver:
+        receiver = sender
+        print(f"ℹ️ 未设置 MAIL_TO，默认发送给发件人: {receiver}")
+    
     smtp_server = os.environ.get("MAIL_SMTP_SERVER", "smtp.qq.com")
     smtp_port = int(os.environ.get("MAIL_SMTP_PORT", 465))
     
@@ -19,25 +22,31 @@ def send_mail(subject, content):
         return
 
     try:
+        # 构造邮件对象
         message = MIMEText(content, "plain", "utf-8")
-        message["From"] = Header(f"GLaDOS Bot <{sender}>", "utf-8")
-        message["To"] = Header(receiver, "utf-8")
-        message["Subject"] = Header(subject, "utf-8")
+        
+        # 使用 formataddr 生成符合 RFC 标准的头部
+        # 格式: "显示名称 <邮箱地址>"
+        message["From"] = formataddr(("GLaDOS Bot", sender))
+        message["To"] = formataddr(("User", receiver))
+        message["Subject"] = subject
 
-        print("📧 正在发送邮件通知...")
+        print(f"📧 正在发送邮件通知至 {receiver} ...")
+        
         if smtp_port == 465:
             server = smtplib.SMTP_SSL(smtp_server, smtp_port)
         else:
-            # 兼容非 SSL 端口 (如 587 TLS)
             server = smtplib.SMTP(smtp_server, smtp_port)
             server.starttls()
             
         server.login(sender, password)
         server.sendmail(sender, [receiver], message.as_string())
         server.quit()
-        print(f"✅ 邮件已发送至 {receiver}")
+        print(f"✅ 邮件已发送成功")
+    except smtplib.SMTPRecipientsRefused:
+        print(f"❌ 邮件发送失败: 收件人地址 {receiver} 不存在或被拒绝")
     except Exception as e:
-        print(f"❌ 邮件发送失败: {str(e)}")
+        print(f"❌ 邮件发送异常: {str(e)}")
 
 def checkin():
     cookie = os.environ.get("GLADOS_COOKIE")
@@ -69,7 +78,6 @@ def checkin():
             message = data.get("message")
             days_str = "未知"
 
-            # 获取天数 (如果不是 token error)
             if "token error" not in str(message).lower():
                 try:
                     status_url = "https://glados.space/api/user/status"
@@ -81,12 +89,10 @@ def checkin():
                 except:
                     pass
 
-            # code 0: 成功, code 1: 重复
             if code in [0, 1]:
                 status_msg = "签到成功" if code == 0 else "重复签到"
                 log_msg = f"{status_msg}: {message}\n📅 剩余天数: {days_str}"
                 print(f"✅ {log_msg}")
-                # 现在的需求是：重复签到也要发邮件 (成功当然也要发)
                 send_mail(f"GLaDOS {status_msg}", log_msg)
             else:
                 err_msg = f"签到失败: {message} (Code: {code})"
