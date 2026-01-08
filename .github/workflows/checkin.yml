@@ -2,8 +2,8 @@ name: Glados Daily Checkin
 
 on:
   schedule:
-    # 北京时间 9:00 = UTC 1:00
-    - cron: '0 1 * * *'
+    # 北京时间 10:30 = UTC 2:30
+    - cron: '30 2 * * *'
   workflow_dispatch:
 
 jobs:
