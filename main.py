@@ -4,6 +4,7 @@ import sys
 import smtplib
 from email.mime.text import MIMEText
 from email.utils import formataddr
+from datetime import datetime
 
 def send_mail(subject, content):
     sender = os.environ.get("MAIL_USERNAME")
@@ -22,6 +23,10 @@ def send_mail(subject, content):
         return
 
     try:
+        # 在主题中添加时间戳，避免被识别为重复邮件
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        unique_subject = f"{subject} [{timestamp}]"
+        
         # 构造邮件对象
         message = MIMEText(content, "plain", "utf-8")
         
@@ -29,7 +34,7 @@ def send_mail(subject, content):
         # 格式: "显示名称 <邮箱地址>"
         message["From"] = formataddr(("GLaDOS Bot", sender))
         message["To"] = formataddr(("User", receiver))
-        message["Subject"] = subject
+        message["Subject"] = unique_subject
 
         print(f"📧 正在发送邮件通知至 {receiver} ...")
         
