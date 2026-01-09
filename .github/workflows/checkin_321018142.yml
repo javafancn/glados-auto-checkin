@@ -2,8 +2,8 @@ name: check_in_321018142
 
 on:
   schedule:
-    # 北京时间 9:18 = UTC 1:18
-    - cron: '18 1 * * *'
+    # 北京时间 9:17 = UTC 1:17
+    - cron: '17 1 * * *'
   workflow_dispatch:
 
 jobs:
