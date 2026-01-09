@@ -28,10 +28,10 @@ jobs:
       - name: Run Check-in
         env:
           GLADOS_COOKIE: ${{ secrets.GLADOS_COOKIE_321018142 }}
-          GLADOS_TOKEN: ${{ secrets.GLADOS_TOKEN_321018142 }}
-          MAIL_USERNAME: ${{ secrets.MAIL_USERNAME_321018142 }}
-          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD_321018142 }}
-          MAIL_TO: ${{ secrets.MAIL_TO_321018142 }}
-          MAIL_SMTP_SERVER: ${{ secrets.MAIL_SMTP_SERVER_321018142 }}
-          MAIL_SMTP_PORT: ${{ secrets.MAIL_SMTP_PORT_321018142 }}
+          GLADOS_TOKEN: ${{ secrets.GLADOS_TOKEN }}
+          MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
+          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+          MAIL_TO: ${{ secrets.MAIL_TO }}
+          MAIL_SMTP_SERVER: ${{ secrets.MAIL_SMTP_SERVER }}
+          MAIL_SMTP_PORT: ${{ secrets.MAIL_SMTP_PORT }}
         run: python3 main.py
