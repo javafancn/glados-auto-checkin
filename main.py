@@ -63,13 +63,13 @@ def checkin():
         send_mail("GLaDOS 配置错误", msg)
         sys.exit(1)
 
-    url = "https://glados.space/api/user/checkin"
+    url = "https://glados.cloud/api/user/checkin"
     headers = {
         "Cookie": cookie,
         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
         "Content-Type": "application/json;charset=UTF-8",
-        "Origin": "https://glados.space",
-        "Referer": "https://glados.space/console/checkin"
+        "Origin": "https://glados.cloud",
+        "Referer": "https://glados.cloud/console/checkin"
     }
     payload = {"token": token}
 
@@ -85,7 +85,7 @@ def checkin():
 
             if "token error" not in str(message).lower():
                 try:
-                    status_url = "https://glados.space/api/user/status"
+                    status_url = "https://glados.cloud/api/user/status"
                     status_resp = requests.get(status_url, headers=headers, timeout=10)
                     if status_resp.status_code == 200:
                         status_data = status_resp.json()
