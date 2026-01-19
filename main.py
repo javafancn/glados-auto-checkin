@@ -55,6 +55,7 @@ def send_mail(subject, content):
 
 def checkin():
     cookie = os.environ.get("GLADOS_COOKIE")
+    token = os.environ.get("GLADOS_TOKEN", "glados.cloud")
     
     if not cookie:
         msg = "❌ 错误: 未设置 GLADOS_COOKIE 环境变量"
@@ -70,10 +71,11 @@ def checkin():
         "Origin": "https://glados.cloud",
         "Referer": "https://glados.cloud/console/checkin"
     }
+    payload = {"token": token}
 
     try:
-        print("🚀 正在尝试签到...")
-        response = requests.post(url, headers=headers, timeout=10)
+        print(f"🚀 正在尝试签到 (Token: {token})...")
+        response = requests.post(url, headers=headers, json=payload, timeout=10)
         
         if response.status_code == 200:
             data = response.json()
