@@ -42,7 +42,7 @@ def send_mail(subject, content):
             server = smtplib.SMTP_SSL(smtp_server, smtp_port)
         else:
             server = smtplib.SMTP(smtp_server, smtp_port)
-            server.starttls()
+            server.starttls()t
             
         server.login(sender, password)
         server.sendmail(sender, [receiver], message.as_string())
@@ -55,7 +55,6 @@ def send_mail(subject, content):
 
 def checkin():
     cookie = os.environ.get("GLADOS_COOKIE")
-    # token = os.environ.get("GLADOS_TOKEN", "glados.one")
     
     if not cookie:
         msg = "❌ 错误: 未设置 GLADOS_COOKIE 环境变量"
@@ -71,11 +70,9 @@ def checkin():
         "Origin": "https://glados.cloud",
         "Referer": "https://glados.cloud/console/checkin"
     }
-    # payload = {"token": token}
 
     try:
-        print(f"🚀 正在尝试签到 (Token: {token})...")
-        # response = requests.post(url, headers=headers, json=payload, timeout=10)
+        print("🚀 正在尝试签到...")
         response = requests.post(url, headers=headers, timeout=10)
         
         if response.status_code == 200:
