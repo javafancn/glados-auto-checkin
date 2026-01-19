@@ -42,7 +42,7 @@ def send_mail(subject, content):
             server = smtplib.SMTP_SSL(smtp_server, smtp_port)
         else:
             server = smtplib.SMTP(smtp_server, smtp_port)
-            server.starttls()t
+            server.starttls()
             
         server.login(sender, password)
         server.sendmail(sender, [receiver], message.as_string())
