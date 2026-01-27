@@ -6,6 +6,9 @@ from email.mime.text import MIMEText
 from email.utils import formataddr
 from datetime import datetime
 
+# Default timeout for HTTP requests (seconds). Can be overridden with environment variable REQUESTS_TIMEOUT
+REQUESTS_TIMEOUT = int(os.environ.get("REQUESTS_TIMEOUT", "10"))
+
 def send_mail(subject, content):
     sender = os.environ.get("MAIL_USERNAME")
     password = os.environ.get("MAIL_PASSWORD")
@@ -75,7 +78,7 @@ def checkin():
 
     try:
         print(f"🚀 正在尝试签到 (Token: {token})...")
-        response = requests.post(url, headers=headers, json=payload, timeout=10)
+        response = requests.post(url, headers=headers, json=payload, timeout=REQUESTS_TIMEOUT)
         
         if response.status_code == 200:
             data = response.json()
@@ -86,7 +89,7 @@ def checkin():
             if "token error" not in str(message).lower():
                 try:
                     status_url = "https://glados.cloud/api/user/status"
-                    status_resp = requests.get(status_url, headers=headers, timeout=10)
+                    status_resp = requests.get(status_url, headers=headers, timeout=REQUESTS_TIMEOUT)
                     if status_resp.status_code == 200:
                         status_data = status_resp.json()
                         days = status_data.get("data", {}).get("leftDays")
